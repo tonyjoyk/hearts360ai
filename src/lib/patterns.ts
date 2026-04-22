@@ -123,7 +123,8 @@ export function compositeScore(f: Facility): number {
     ((100 - cur(h.dmNoVisit12m)) / 100) * 3;
 
   // Clinical (25)
-  const stockScore = cur(h.stock) === "full" ? 1 : cur(h.stock) === "partial" ? 0.5 : 0.1;
+  const curStock = h.stock[h.stock.length - 1];
+  const stockScore = curStock === "full" ? 1 : curStock === "partial" ? 0.5 : 0.1;
   const clinical =
     (cur(h.titration) / 100) * 10 +
     stockScore * 10 +
