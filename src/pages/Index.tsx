@@ -1,156 +1,173 @@
 import { useMemo, useState } from "react";
-import { FACILITIES } from "@/data/facilities";
-import { compositeScore, deriveStatus, deriveTemporal, isImproving, prioritize } from "@/lib/patterns";
-import { DistrictPulse } from "@/components/DistrictPulse";
+import { DISTRICT, DISTRICT_INSIGHTS, FACILITIES, getNeedsAttention, type FacilityStatus } from "@/data/facilities";
+import { StatGrid } from "@/components/StatGrid";
 import { FacilityCard } from "@/components/FacilityCard";
-import { ChevronDown, Info } from "lucide-react";
+import { useDismissed, usePinned, useVisited } from "@/hooks/useLocalState";
 import { cn } from "@/lib/utils";
 
-type Filter = "all" | "action_needed" | "at_risk" | "on_target" | "improving" | "persistent" | "anomaly";
+type Filter = "all" | FacilityStatus;
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "action_needed", label: "Action needed" },
-  { id: "at_risk", label: "At risk" },
-  { id: "on_target", label: "On target" },
+  { id: "action", label: "Action needed" },
+  { id: "risk", label: "At risk" },
   { id: "improving", label: "Improving" },
-  { id: "persistent", label: "Persistent" },
-  { id: "anomaly", label: "Anomalies" },
+  { id: "target", label: "On target" },
+  { id: "top", label: "Top performer" },
+  { id: "stagnating", label: "Stagnating" },
 ];
 
-const Index = () => {
+export default function Index() {
+  const pinned = usePinned();
+  const dismissed = useDismissed();
+  const visited = useVisited();
   const [filter, setFilter] = useState<Filter>("all");
-  const [listOpen, setListOpen] = useState(false);
-  const [showHowTo, setShowHowTo] = useState(false);
 
-  const priorities = useMemo(() => prioritize(FACILITIES).slice(0, 5), []);
-
-  const filtered = useMemo(() => {
-    const enriched = FACILITIES.map((f) => ({
-      f,
-      status: deriveStatus(f),
-      temporal: deriveTemporal(f).label,
-      improving: isImproving(f),
-      score: compositeScore(f),
-    }));
-    const result = enriched.filter(({ status, temporal, improving }) => {
-      if (filter === "all") return true;
-      if (filter === "improving") return improving;
-      if (filter === "persistent") return temporal === "persistent" || temporal === "stagnating";
-      if (filter === "anomaly") return temporal === "anomaly" || temporal === "new_drop";
-      return status === filter;
+  // Top 3 needs-attention, respecting dismissed and pinning
+  const needsAttention = useMemo(() => {
+    const base = getNeedsAttention(FACILITIES).filter((f) => !dismissed.has(f.id));
+    // Pinned facilities float to the top
+    return base.sort((a, b) => {
+      const ap = pinned.has(a.id) ? -1 : 0;
+      const bp = pinned.has(b.id) ? -1 : 0;
+      return ap - bp;
     });
-    return result.sort((a, b) => a.score - b.score);
-  }, [filter]);
+    // intentionally not memoising on pinned/dismissed values themselves to keep it cheap;
+    // hooks return stable refs across renders enough for this size of data
+  }, [pinned, dismissed]);
+
+  const needsIds = new Set(needsAttention.map((f) => f.id));
+
+  // Counts per filter for the chip labels — counted from "All facilities" pool
+  const countsPool = useMemo(
+    () => FACILITIES.filter((f) => !needsIds.has(f.id)),
+    // needsIds derived from needsAttention which depends on pinned/dismissed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [needsAttention],
+  );
+  const counts = useMemo(() => {
+    const c: Record<Filter, number> = { all: countsPool.length, action: 0, risk: 0, target: 0, improving: 0, stagnating: 0, top: 0 };
+    for (const f of countsPool) c[f.status]++;
+    return c;
+  }, [countsPool]);
+
+  const allFacilities = useMemo(() => {
+    const list = countsPool.filter((f) => filter === "all" || f.status === filter);
+    return [...list].sort((a, b) => {
+      const ap = pinned.has(a.id) ? 1 : 0;
+      const bp = pinned.has(b.id) ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+      // Then by BP control ascending (worst first)
+      return a.bpControl - b.bpControl;
+    });
+  }, [countsPool, filter, pinned]);
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Page header */}
-      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
-          <div>
-            <h1 className="text-sm font-semibold leading-tight">Facility Performance Review</h1>
-            <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">Sylhet District · Hypertension Programme</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowHowTo((s) => !s)}
-            className="inline-flex items-center gap-1.5 rounded-full border bg-surface px-2.5 py-1 text-xs hover:bg-surface-sunken"
-            aria-expanded={showHowTo}
-          >
-            <Info className="h-3.5 w-3.5" />
-            How to use
-          </button>
+      <div className="mx-auto min-h-screen max-w-[420px] border-x border-border bg-surface px-[18px] pb-20 pt-5 sm:my-6 sm:rounded-xl sm:border">
+        {/* Header */}
+        <header className="mb-5">
+          <h1 className="mb-[3px] text-[20px] font-bold leading-tight tracking-[-0.3px]">
+            District summary for April
+          </h1>
+          <p className="text-[12.5px] leading-[1.4] text-muted-foreground">
+            Sylhet District · {DISTRICT.month} · {DISTRICT.facilityCount} facilities ·{" "}
+            <span className="font-mono tnum">{DISTRICT.totalPatients.toLocaleString()}</span> patients
+          </p>
+        </header>
+
+        {/* District stats */}
+        <div className="mb-5">
+          <StatGrid stats={DISTRICT.stats} />
         </div>
-        {showHowTo && (
-          <div className="border-t bg-surface-sunken/60 px-4 py-3 text-xs leading-snug text-muted-foreground">
-            <p className="mb-1 font-medium text-foreground">This tool tells you where to look — not what to conclude.</p>
-            <p>Every insight names the data it's built on. Treat the investigation steps as required verification before acting. If the data and the field don't agree, trust the field and log what you saw — the tool will deprioritise that signal next month.</p>
-          </div>
-        )}
-      </header>
 
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-5">
-        {/* District pulse */}
-        <DistrictPulse />
+        {/* District insights */}
+        <ul className="mb-[18px] space-y-0">
+          {DISTRICT_INSIGHTS.map((i, idx) => (
+            <li
+              key={idx}
+              className={cn(
+                "relative py-1 pl-4 text-[13px] leading-[1.5] text-foreground/80 before:absolute before:left-0 before:top-[10px] before:h-1.5 before:w-1.5 before:rounded-full",
+                i.tone === "bad" ? "before:bg-bad" : "before:bg-good",
+              )}
+            >
+              {i.text}
+            </li>
+          ))}
+        </ul>
 
-        {/* Priorities */}
-        <section aria-labelledby="priorities">
-          <header className="mb-2 flex items-end justify-between gap-3">
-            <div>
-              <h2 id="priorities" className="text-lg font-semibold leading-tight">This month's priorities</h2>
-              <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-                {priorities.length} facilities ranked by composite score
-              </p>
-            </div>
-          </header>
-          <div className="space-y-3">
-            {priorities.map((f, i) => (
-              <FacilityCard key={f.id} facility={f} variant="priority" rank={i + 1} defaultOpen={i === 0} />
-            ))}
-          </div>
-        </section>
-
-        {/* Full list */}
-        <section aria-labelledby="all-facilities">
-          <button
-            type="button"
-            onClick={() => setListOpen((o) => !o)}
-            className="flex w-full items-center justify-between gap-3 rounded-md border bg-surface px-4 py-3 text-left"
-            aria-expanded={listOpen}
-          >
-            <div>
-              <h2 id="all-facilities" className="text-base font-semibold leading-tight">All facilities</h2>
-              <p className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-                {FACILITIES.length} total · tap to {listOpen ? "collapse" : "expand"}
-              </p>
-            </div>
-            <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", listOpen && "rotate-180")} />
-          </button>
-
-          {listOpen && (
-            <div className="mt-3 space-y-3">
-              {/* Sticky filter pills */}
-              <div className="sticky top-[57px] z-20 -mx-4 overflow-x-auto bg-background/95 px-4 py-2 backdrop-blur">
-                <div className="flex gap-1.5">
-                  {FILTERS.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setFilter(f.id)}
-                      className={cn(
-                        "shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-                        filter === f.id
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border bg-surface text-foreground hover:bg-surface-sunken"
-                      )}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {filtered.map(({ f }) => (
-                  <FacilityCard key={f.id} facility={f} variant="list" />
-                ))}
-                {filtered.length === 0 && (
-                  <p className="rounded-md border bg-surface p-4 text-center text-sm text-muted-foreground">
-                    No facilities match this filter.
-                  </p>
-                )}
-              </div>
+        {/* Needs attention */}
+        <h2 className="mb-2.5 mt-1 text-[13px] font-bold">Facilities that need attention</h2>
+        <div className="mb-5 space-y-2">
+          {needsAttention.length > 0 ? (
+            needsAttention.map((f) => (
+              <FacilityCard
+                key={f.id}
+                facility={f}
+                showDismiss
+                pinned={pinned.has(f.id)}
+                visited={visited.isVisited(f.id)}
+                onPin={() => pinned.toggle(f.id)}
+                onDismiss={() => dismissed.add(f.id)}
+              />
+            ))
+          ) : (
+            <div className="rounded-md border bg-surface p-4 text-center text-[13px] text-muted-foreground">
+              All clear. No facilities need urgent attention this month.
             </div>
           )}
-        </section>
+        </div>
 
-        <footer className="border-t pt-4 text-center font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-          Prototype · Sample data · Field notes saved locally
-        </footer>
+        {/* All facilities */}
+        <h2 className="mb-2.5 mt-5 text-[13px] font-bold">All facilities</h2>
+
+        {/* Filter chips */}
+        <div className="-mx-[18px] mb-3 overflow-x-auto px-[18px]">
+          <div className="flex gap-1.5">
+            {FILTERS.map((f) => {
+              const active = filter === f.id;
+              const count = counts[f.id];
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFilter(f.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    "shrink-0 rounded-full border px-3 py-1.5 text-[11.5px] font-medium transition-colors",
+                    active
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-surface text-foreground hover:bg-surface-sunken",
+                  )}
+                >
+                  {f.label}{" "}
+                  <span className={cn("font-mono tnum text-[10.5px]", active ? "opacity-80" : "text-muted-foreground")}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {allFacilities.length > 0 ? (
+            allFacilities.map((f) => (
+              <FacilityCard
+                key={f.id}
+                facility={f}
+                pinned={pinned.has(f.id)}
+                visited={visited.isVisited(f.id)}
+                onPin={() => pinned.toggle(f.id)}
+              />
+            ))
+          ) : (
+            <div className="rounded-md border bg-surface p-4 text-center text-[13px] text-muted-foreground">
+              No facilities match this filter.
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
-};
-
-export default Index;
+}
