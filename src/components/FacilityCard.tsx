@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { Facility } from "@/data/facilities";
 import { StatusTag } from "./StatusTag";
 import { cn } from "@/lib/utils";
+import { classifyInsight } from "@/lib/sentiment";
 
 interface Props {
   facility: Facility;
@@ -73,14 +74,20 @@ export function FacilityCard({ facility, showDismiss, pinned, visited, onPin, on
         </div>
       </div>
       <ul className="space-y-0.5">
-        {facility.cardInsights.slice(0, 3).map((i, idx) => (
-          <li
-            key={idx}
-            className="relative pl-3.5 text-[12.5px] leading-[1.5] text-foreground/80 before:absolute before:left-0 before:top-[9px] before:h-1 before:w-1 before:rounded-full before:bg-border-strong"
-          >
-            {i}
-          </li>
-        ))}
+        {facility.cardInsights.slice(0, 3).map((i, idx) => {
+          const sentiment = classifyInsight(i);
+          return (
+            <li
+              key={idx}
+              className={cn(
+                "relative pl-3.5 text-[12.5px] leading-[1.5] text-foreground/80 before:absolute before:left-0 before:top-[9px] before:h-1.5 before:w-1.5 before:rounded-full",
+                sentiment === "positive" ? "before:bg-good" : "before:bg-bad",
+              )}
+            >
+              {i}
+            </li>
+          );
+        })}
       </ul>
       <ChevronRight className="pointer-events-none absolute bottom-2.5 right-2.5 h-3.5 w-3.5 text-muted-foreground/60" />
     </Link>
