@@ -64,7 +64,7 @@ export default function Index() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto min-h-screen max-w-[420px] border-x border-border bg-surface px-[18px] pb-20 pt-5 sm:my-6 sm:rounded-xl sm:border">
+      <div className="mx-auto min-h-screen w-full max-w-[420px] bg-surface px-[18px] pb-20 pt-5 sm:my-6 sm:rounded-xl sm:border">
         {/* Header */}
         <header className="mb-5">
           <h1 className="mb-[3px] text-[20px] font-bold leading-tight tracking-[-0.3px]">

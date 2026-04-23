@@ -54,7 +54,7 @@ export default function FacilityDetail() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto min-h-screen max-w-[420px] animate-in fade-in slide-in-from-right-4 border-x border-border bg-surface px-[18px] pb-20 pt-5 duration-200 sm:my-6 sm:rounded-xl sm:border">
+      <div className="mx-auto min-h-screen w-full max-w-[420px] animate-in fade-in slide-in-from-right-4 bg-surface px-[18px] pb-20 pt-5 duration-200 sm:my-6 sm:rounded-xl sm:border">
         {/* Header */}
         <div className="mb-5 flex items-center gap-3">
           <button
