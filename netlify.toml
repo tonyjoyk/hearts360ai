@@ -1,0 +1,9 @@
+# Optional: deploy with Netlify “Import from Git”. NETLIFY=1 gives Vite base "/".
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

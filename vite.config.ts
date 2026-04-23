@@ -3,10 +3,31 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// "/" on Vercel/Netlify (shareable previews); "/tool/" for copying into hearts360.org static tree
-const baseUrl =
-  process.env.VITE_BASE_PATH ??
-  (process.env.VERCEL || process.env.NETLIFY ? "/" : "/tool/");
+/**
+ * - VITE_BASE_PATH — explicit override
+ * - Vercel / Netlify — site at domain root → "/"
+ * - GitHub Actions → same name as repo (…/github.io/<repo>/)
+ * - Local / hearts360 copy → "/tool/"
+ */
+function resolveBaseUrl(): string {
+  const explicit = process.env.VITE_BASE_PATH?.trim();
+  if (explicit) {
+    const p = explicit.startsWith("/") ? explicit : `/${explicit}`;
+    return p.endsWith("/") ? p : `${p}/`;
+  }
+  if (process.env.VERCEL || process.env.NETLIFY) return "/";
+  if (
+    process.env.GITHUB_ACTIONS === "true" &&
+    process.env.GITHUB_REPOSITORY &&
+    !process.env.VITE_FORCE_TOOL_BASE
+  ) {
+    const repo = process.env.GITHUB_REPOSITORY.split("/")[1];
+    if (repo) return `/${repo}/`;
+  }
+  return "/tool/";
+}
+
+const baseUrl = resolveBaseUrl();
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({

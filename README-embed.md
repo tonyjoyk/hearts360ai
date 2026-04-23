@@ -90,12 +90,28 @@ npm run sync:hearts360-static-card
 
 That writes **`../hearts360/overview-ds-card-district-data.generated.html`** (sibling repo). Paste its contents over the **`ds-metrics-wrap` … `ds-fac-list`** section in **`hearts360/index.html`**, or use it as a diff check. Sparklines stay as fixed SVG paths in that fragment (visual design, not tied to numeric series).
 
-## 9. Shareable live URL
+## 9. Shareable live URL (dashboard card + in-app side panel)
 
-**GitHub Actions → GitHub Pages**
+The **Home** route loads **`DashboardCard`** and opens **`DistrictSummary`** in the right **`SidePanel`** when you tap **View district report**.
 
-1. Repo **Settings → Pages**: set **Source** to **GitHub Actions** (not “Deploy from branch”).
-2. Push to **`main`**; workflow **Deploy to GitHub Pages** (`.github/workflows/deploy-pages.yml`) builds with `VITE_BASE_PATH=/<repo>/` and publishes **`dist`**.
-3. After the first successful run, the site is at **`https://<username>.github.io/<repo>/`** (for this repo: **`https://tonyjoyk.github.io/hearts360ai/`**). Use hash routes, e.g. **`…/hearts360ai/#/embed/summary?embed=1`**.
+### Canonical links (replace `<repo>` if you renamed the fork)
 
-**Vercel:** Import the repo at [vercel.com](https://vercel.com); production builds set **`VERCEL=1`** so `vite.config.ts` uses **`base: "/"`**. **`vercel.json`** adds SPA rewrites. Example app URL: **`https://<project>.vercel.app`**.
+| What | URL pattern |
+|------|-------------|
+| **Home — dashboard + panel** | `https://<user>.github.io/<repo>/#/` |
+| Same (explicit index) | `https://<user>.github.io/<repo>/index.html#/` |
+| Full summary only (panel-style layout) | `https://<user>.github.io/<repo>/#/embed/summary?embed=1` |
+| Dashboard card only (iframe-style) | `https://<user>.github.io/<repo>/#/embed/dashboard-card?embed=1` |
+
+For **[tonyjoyk/hearts360ai](https://github.com/tonyjoyk/hearts360ai)** that is:
+
+- **Dashboard + side panel:** **`https://tonyjoyk.github.io/hearts360ai/#/`**  
+  (Open **View district report** to slide the panel in; on narrow screens it becomes a full-width drawer.)
+
+If that URL returns **404**, GitHub Pages is not publishing yet:
+
+1. **Settings → Pages → Build and deployment → Source:** **GitHub Actions** (not “Deploy from a branch”).
+2. **Actions** tab → run **Deploy to GitHub Pages** (or push to **`main`**).
+3. Wait for green check, then reload **`https://tonyjoyk.github.io/hearts360ai/#/`**.
+
+**Vercel (often faster to go live):** Import the repo at [vercel.com](https://vercel.com). Production uses **`base: "/"`**. Then use **`https://<your-project>.vercel.app/#/`** for home + panel.

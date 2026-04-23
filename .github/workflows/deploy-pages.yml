@@ -29,11 +29,13 @@ jobs:
 
       - run: npm ci
 
-      # Project site URL: https://<owner>.github.io/<repoName>/
+      # GITHUB_ACTIONS + GITHUB_REPOSITORY are set by the runner; vite uses them for base: /<repo>/
       - name: Build for GitHub Pages
-        env:
-          VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
+
+      # GitHub Pages serves 404.html for unknown paths — copy SPA shell so refreshes work
+      - name: SPA fallback
+        run: cp dist/index.html dist/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
