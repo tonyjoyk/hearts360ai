@@ -2,7 +2,7 @@ import type { FacilityStatus } from "@/data/facilities";
 import { cn } from "@/lib/utils";
 
 const map: Record<FacilityStatus, { label: string; cls: string }> = {
-  action: { label: "Action needed", cls: "bg-bad-soft text-bad-soft-foreground" },
+  action: { label: "Critical", cls: "bg-bad-soft text-bad-soft-foreground" },
   risk: { label: "At risk", cls: "bg-amber-50 text-amber-800 border border-amber-200" },
   target: { label: "On target", cls: "bg-good-soft text-good-soft-foreground" },
   improving: { label: "Improving", cls: "bg-good-soft text-good-soft-foreground" },
