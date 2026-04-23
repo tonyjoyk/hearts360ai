@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import type { FacilityNote } from "@/data/facilities";
 
-const CONTEXT_KEY = "fr.context.v2";
-const VISITED_KEY = "fr.visited.v2";
-const PINNED_KEY = "fr.pinned.v2";
-const DISMISSED_KEY = "fr.dismissed.v2";
+const CONTEXT_KEY = "fr.context.v3";
+const VISITED_KEY = "fr.visited.v3";
+const PINNED_KEY = "fr.pinned.v3";
+const DISMISSED_KEY = "fr.dismissed.v3";
+const NOTES_KEY = "fr.notes.v3";
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -52,6 +54,7 @@ function useStringSet(key: string) {
   useEffect(() => write(key, Array.from(set)), [key, set]);
   return {
     has: (id: string) => set.has(id),
+    set,
     toggle: (id: string) =>
       setSet((s) => {
         const n = new Set(s);
@@ -81,4 +84,18 @@ export function usePinned() {
 
 export function useDismissed() {
   return useStringSet(DISMISSED_KEY);
+}
+
+/**
+ * User-added notes per facility, persisted to localStorage and displayed
+ * alongside the pre-baked notes from the dataset (most recent first).
+ */
+export function useNotes() {
+  const [map, setMap] = useState<Record<string, FacilityNote[]>>(() => read(NOTES_KEY, {}));
+  useEffect(() => write(NOTES_KEY, map), [map]);
+  return {
+    getNotes: (id: string): FacilityNote[] => map[id] ?? [],
+    addNote: (id: string, note: FacilityNote) =>
+      setMap((m) => ({ ...m, [id]: [...(m[id] ?? []), note] })),
+  };
 }
