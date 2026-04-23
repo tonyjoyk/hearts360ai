@@ -5,6 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Deploy as /tool/ on hearts360.org (GitHub Pages); HashRouter handles routes without server rewrites.
+  base: "/tool/",
   server: {
     host: "::",
     port: 8080,
