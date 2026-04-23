@@ -43,7 +43,7 @@ export default function Home() {
           Quick view of district performance.
         </p>
 
-        <div className="max-w-[420px]">
+        <div className="max-w-[460px]">
           <DashboardCard
             onOpen={() => setOpen(true)}
             onFacilityClick={handleFacilityClick}
