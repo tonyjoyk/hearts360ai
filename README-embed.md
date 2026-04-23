@@ -108,11 +108,11 @@ For **[tonyjoyk/hearts360ai](https://github.com/tonyjoyk/hearts360ai)** that is:
 - **Dashboard + side panel:** **`https://tonyjoyk.github.io/hearts360ai/#/`**  
   (Open **View district report** to slide the panel in; on narrow screens it becomes a full-width drawer.)
 
-If that URL returns **404**, GitHub Pages is not wired up yet:
+If that URL returns **404**, finish GitHub setup (once per repo):
 
-1. **Actions** tab → wait for **Deploy to GitHub Pages** to finish (green). That workflow pushes **`dist`** to branch **`gh-pages`**.
-2. **Settings → Pages → Build and deployment:** set **Source** to **Deploy from a branch**.
-3. Choose branch **`gh-pages`** and folder **`/ (root)`**, **Save**.
-4. Reload **`https://tonyjoyk.github.io/hearts360ai/#/`** after a minute.
+1. **Settings → Actions → General → Workflow permissions:** choose **Read and write permissions**, **Save**. (Otherwise the workflow cannot push branch **`gh-pages`**.)
+2. **Actions** → open **Deploy to GitHub Pages** → confirm the latest run is **green** (or **Run workflow** manually).
+3. **Settings → Pages → Build and deployment:** **Deploy from a branch** → branch **`gh-pages`**, folder **`/ (root)`**, **Save**.
+4. Wait ~1 minute, then open **`https://tonyjoyk.github.io/hearts360ai/#/`** again.
 
 **Vercel (often faster to go live):** Import the repo at [vercel.com](https://vercel.com). Production uses **`base: "/"`**. Then use **`https://<your-project>.vercel.app/#/`** for home + panel.

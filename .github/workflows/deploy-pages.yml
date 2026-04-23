@@ -1,7 +1,10 @@
-# Publishes ./dist to branch `gh-pages`. Works with:
-#   Settings → Pages → Build and deployment → Source: Deploy from a branch → gh-pages / / (root)
+# Publishes ./dist to branch `gh-pages`.
 #
-# Live app (dashboard + side panel): https://<user>.github.io/<repo>/#/
+# After the workflow succeeds once:
+#   Repo → Settings → Pages → Build and deployment → Deploy from a branch
+#   → Branch: gh-pages, Folder: / (root) → Save
+#
+# Open: https://<owner>.github.io/<repo>/#/  (dashboard + "View district report" side panel)
 name: Deploy to GitHub Pages
 
 on:
@@ -9,6 +12,8 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+# Allow pushing the gh-pages branch (org default token must allow "Read and write" for workflows:
+# Settings → Actions → General → Workflow permissions → Read and write permissions)
 permissions:
   contents: write
 
@@ -19,6 +24,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -29,16 +36,16 @@ jobs:
 
       - run: npm ci
 
-      # Runner sets GITHUB_ACTIONS + GITHUB_REPOSITORY → Vite base is /<repo>/
+      # GITHUB_ACTIONS + GITHUB_REPOSITORY are set by GitHub → base path /${{ repo }}/
       - name: Build static site
         run: npm run build
 
-      - name: SPA fallback (404 → index shell)
+      - name: SPA fallback
         run: cp dist/index.html dist/404.html
 
-      - name: Push dist to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Deploy to gh-pages branch
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+          branch: gh-pages
+          folder: dist
+          clean: true
