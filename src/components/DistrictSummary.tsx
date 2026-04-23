@@ -113,7 +113,7 @@ export function DistrictSummary({ embedded = false, onClose }: Props) {
 
       {/* District stats */}
       <div className="mb-5">
-        <DStatGrid stats={DISTRICT.stats} />
+        <DStatGrid stats={DISTRICT.stats} brandOrangeBadDelta />
       </div>
 
       {/* District insights */}

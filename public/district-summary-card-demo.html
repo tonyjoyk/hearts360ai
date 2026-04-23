@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>District summary card — design reference</title>
+    <style>
+      /* Reset minimal */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 32px 16px;
+        background: #f3f4f6;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+      }
+
+      /* Card shell — matches screenshot */
+      .ds-card {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #cbcbcb;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+
+      .ds-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .ds-header__icon {
+        flex-shrink: 0;
+        display: block;
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+      }
+
+      .ds-header__title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        color: #111111;
+      }
+
+      /* Metrics panel — light bordered inner box */
+      .ds-metrics-wrap {
+        border: 1px solid #cbcbcb;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 22px;
+        background: #fafafa;
+      }
+
+      .ds-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .ds-metric {
+        padding: 14px 12px 12px;
+        border-left: 1px solid #cbcbcb;
+        background: #ffffff;
+      }
+
+      .ds-metric:first-child {
+        border-left: 0;
+      }
+
+      .ds-metric__label {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #666666;
+        line-height: 1.25;
+      }
+
+      .ds-metric__delta {
+        margin: 0 0 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 1.375rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: #ed6300;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .ds-metric__now {
+        margin: 0 0 10px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        color: #666666;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .ds-metric__now strong {
+        font-weight: 700;
+        color: #111111;
+      }
+
+      .ds-spark {
+        display: block;
+        width: 100%;
+        height: 28px;
+        color: #9ca3af;
+      }
+
+      .ds-spark__dot {
+        fill: #ed6300;
+      }
+
+      /* Facilities */
+      .ds-fac-heading {
+        margin: 0 0 14px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #666666;
+      }
+
+      .ds-fac-list {
+        list-style: none;
+        margin: 0 0 24px;
+        padding: 0;
+      }
+
+      .ds-fac-item + .ds-fac-item {
+        margin-top: 18px;
+      }
+
+      .ds-fac-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .ds-fac-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #111111;
+        line-height: 1.3;
+      }
+
+      .ds-badge {
+        flex-shrink: 0;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #9b1c1c;
+        background: #fde8e8;
+      }
+
+      .ds-fac-desc {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #666666;
+      }
+
+      /* CTA */
+      .ds-cta {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #111111;
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+
+      .ds-cta:hover {
+        background: #262626;
+      }
+
+      .ds-cta:focus-visible {
+        outline: 2px solid #111111;
+        outline-offset: 2px;
+      }
+
+      @media (max-width: 400px) {
+        .ds-metrics {
+          grid-template-columns: 1fr;
+        }
+        .ds-metric {
+          border-left: 0;
+          border-top: 1px solid #cbcbcb;
+        }
+        .ds-metric:first-child {
+          border-top: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="ds-card" aria-label="District summary">
+      <header class="ds-header">
+        <!-- Noun Project sparkle icon (PNG — reliable vs SVG when opening file:// or /tool/) -->
+        <img
+          class="ds-header__icon"
+          src="./icons/district-insights-icon.png"
+          width="22"
+          height="22"
+          alt=""
+          decoding="async"
+        />
+        <h1 class="ds-header__title">District summary</h1>
+      </header>
+
+      <div class="ds-metrics-wrap">
+        <div class="ds-metrics">
+          <div class="ds-metric">
+            <p class="ds-metric__label">BP control</p>
+            <p class="ds-metric__delta">−2 pp</p>
+            <p class="ds-metric__now">now <strong>54%</strong></p>
+            <svg
+              class="ds-spark"
+              viewBox="0 0 96 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <!-- Downward trend: noisy month-to-month path, ends low right -->
+              <polyline
+                points="4,7 11,7 17,6 23,9 29,8 35,11 41,12 47,14 53,15 59,16 65,17 71,18 77,20 83,21 88,22"
+                stroke="currentColor"
+                stroke-width="1.35"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle class="ds-spark__dot" cx="88" cy="22" r="3" />
+            </svg>
+          </div>
+          <div class="ds-metric">
+            <p class="ds-metric__label">BP uncontrolled</p>
+            <p class="ds-metric__delta">+1 pp</p>
+            <p class="ds-metric__now">now <strong>17%</strong></p>
+            <svg
+              class="ds-spark"
+              viewBox="0 0 96 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <!-- Upward trend: irregular recoveries / dips -->
+              <polyline
+                points="4,22 11,21 17,20 23,18 29,17 35,15 41,14 47,13 53,12 59,11 65,10 71,9 77,8 83,8 88,8"
+                stroke="currentColor"
+                stroke-width="1.35"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle class="ds-spark__dot" cx="88" cy="8" r="3" />
+            </svg>
+          </div>
+          <div class="ds-metric">
+            <p class="ds-metric__label">Missed visit</p>
+            <p class="ds-metric__delta">+1 pp</p>
+            <p class="ds-metric__now">now <strong>31%</strong></p>
+            <svg
+              class="ds-spark"
+              viewBox="0 0 96 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <!-- Upward trend: distinct wobble from middle chart -->
+              <polyline
+                points="4,23 11,22 17,21 23,19 29,18 35,16 41,15 47,13 53,12 59,11 65,10 71,9 77,8 83,7 88,8"
+                stroke="currentColor"
+                stroke-width="1.35"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle class="ds-spark__dot" cx="88" cy="8" r="3" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <p class="ds-fac-heading">Facilities that need attention</p>
+      <ul class="ds-fac-list">
+        <li class="ds-fac-item">
+          <div class="ds-fac-row">
+            <span class="ds-fac-name">CC Chhatrish</span>
+            <span class="ds-badge">Critical</span>
+          </div>
+          <p class="ds-fac-desc">
+            BP control dropped sharply — 5 points in one month.
+          </p>
+        </li>
+        <li class="ds-fac-item">
+          <div class="ds-fac-row">
+            <span class="ds-fac-name">CC Osmaninagar</span>
+            <span class="ds-badge">Critical</span>
+          </div>
+          <p class="ds-fac-desc">
+            BP control is the lowest in the district at 37%.
+          </p>
+        </li>
+        <li class="ds-fac-item">
+          <div class="ds-fac-row">
+            <span class="ds-fac-name">UHC Fenchuganj</span>
+            <span class="ds-badge">Critical</span>
+          </div>
+          <p class="ds-fac-desc">
+            BP control is 38%. Many patients are not returning — 35% missed their last visit.
+          </p>
+        </li>
+      </ul>
+
+      <button type="button" class="ds-cta">View district report</button>
+    </article>
+  </body>
+</html>
