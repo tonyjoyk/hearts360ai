@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { DISTRICT, DISTRICT_INSIGHTS, FACILITIES, getNeedsAttention, type FacilityStatus } from "@/data/facilities";
-import { StatGrid } from "@/components/StatGrid";
+import { DStatGrid } from "@/components/DStatGrid";
 import { FacilityCard } from "@/components/FacilityCard";
 import { useDismissed, usePinned, useVisited } from "@/hooks/useLocalState";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | FacilityStatus;
@@ -23,25 +24,16 @@ export default function Index() {
   const visited = useVisited();
   const [filter, setFilter] = useState<Filter>("all");
 
-  // Top 3 needs-attention, respecting dismissed and pinning
-  const needsAttention = useMemo(() => {
-    const base = getNeedsAttention(FACILITIES).filter((f) => !dismissed.has(f.id));
-    // Pinned facilities float to the top
-    return base.sort((a, b) => {
-      const ap = pinned.has(a.id) ? -1 : 0;
-      const bp = pinned.has(b.id) ? -1 : 0;
-      return ap - bp;
-    });
-    // intentionally not memoising on pinned/dismissed values themselves to keep it cheap;
-    // hooks return stable refs across renders enough for this size of data
-  }, [pinned, dismissed]);
-
+  // Top 3 needs-attention — auto-refills when one is dismissed (always shows up to 3)
+  const needsAttention = useMemo(
+    () => getNeedsAttention(FACILITIES, dismissed.set, pinned.set, 3),
+    [dismissed.set, pinned.set],
+  );
   const needsIds = new Set(needsAttention.map((f) => f.id));
 
-  // Counts per filter for the chip labels — counted from "All facilities" pool
+  // "All facilities" pool excludes whatever is currently shown in needs-attention
   const countsPool = useMemo(
     () => FACILITIES.filter((f) => !needsIds.has(f.id)),
-    // needsIds derived from needsAttention which depends on pinned/dismissed
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [needsAttention],
   );
@@ -57,10 +49,20 @@ export default function Index() {
       const ap = pinned.has(a.id) ? 1 : 0;
       const bp = pinned.has(b.id) ? 1 : 0;
       if (ap !== bp) return bp - ap;
-      // Then by BP control ascending (worst first)
       return a.bpControl - b.bpControl;
     });
   }, [countsPool, filter, pinned]);
+
+  const handleDismiss = (id: string, name: string) => {
+    dismissed.add(id);
+    toast(`Removed ${name} from priority list`, {
+      description: "Still available in All facilities",
+      action: {
+        label: "Undo",
+        onClick: () => dismissed.remove(id),
+      },
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background">
@@ -76,9 +78,9 @@ export default function Index() {
           </p>
         </header>
 
-        {/* District stats */}
+        {/* District stats — delta-first */}
         <div className="mb-5">
-          <StatGrid stats={DISTRICT.stats} />
+          <DStatGrid stats={DISTRICT.stats} />
         </div>
 
         {/* District insights */}
@@ -108,7 +110,7 @@ export default function Index() {
                 pinned={pinned.has(f.id)}
                 visited={visited.isVisited(f.id)}
                 onPin={() => pinned.toggle(f.id)}
-                onDismiss={() => dismissed.add(f.id)}
+                onDismiss={() => handleDismiss(f.id, f.name)}
               />
             ))
           ) : (
