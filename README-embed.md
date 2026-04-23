@@ -108,10 +108,11 @@ For **[tonyjoyk/hearts360ai](https://github.com/tonyjoyk/hearts360ai)** that is:
 - **Dashboard + side panel:** **`https://tonyjoyk.github.io/hearts360ai/#/`**  
   (Open **View district report** to slide the panel in; on narrow screens it becomes a full-width drawer.)
 
-If that URL returns **404**, GitHub Pages is not publishing yet:
+If that URL returns **404**, GitHub Pages is not wired up yet:
 
-1. **Settings → Pages → Build and deployment → Source:** **GitHub Actions** (not “Deploy from a branch”).
-2. **Actions** tab → run **Deploy to GitHub Pages** (or push to **`main`**).
-3. Wait for green check, then reload **`https://tonyjoyk.github.io/hearts360ai/#/`**.
+1. **Actions** tab → wait for **Deploy to GitHub Pages** to finish (green). That workflow pushes **`dist`** to branch **`gh-pages`**.
+2. **Settings → Pages → Build and deployment:** set **Source** to **Deploy from a branch**.
+3. Choose branch **`gh-pages`** and folder **`/ (root)`**, **Save**.
+4. Reload **`https://tonyjoyk.github.io/hearts360ai/#/`** after a minute.
 
 **Vercel (often faster to go live):** Import the repo at [vercel.com](https://vercel.com). Production uses **`base: "/"`**. Then use **`https://<your-project>.vercel.app/#/`** for home + panel.
