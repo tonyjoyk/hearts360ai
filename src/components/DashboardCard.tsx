@@ -52,19 +52,19 @@ export function DashboardCard({ onOpen, onFacilityClick }: Props) {
       </div>
 
       <div className="p-4">
-        {/* Headline KPI */}
+        {/* Headline KPI — delta-first, matching the District summary */}
         <div className="mb-3 flex items-end gap-3">
           <div className="min-w-0">
             <div className="text-[10.5px] font-medium uppercase tracking-[0.4px] text-muted-foreground">
               {headline.label}
             </div>
             <div className="mt-0.5 flex items-baseline gap-2">
-              <span className="font-mono text-[28px] font-bold leading-none tracking-[-0.5px] tnum">
-                {headline.value}%
-              </span>
-              <span className={cn("font-mono text-[12px] font-semibold tnum", deltaCls)}>
+              <span className={cn("font-mono text-[28px] font-bold leading-none tracking-[-0.5px] tnum", deltaCls)}>
                 {deltaSign}
                 {Math.abs(headline.delta)} pp
+              </span>
+              <span className="font-mono text-[12px] text-muted-foreground tnum">
+                now <strong className="font-semibold text-foreground/80">{headline.value}%</strong>
               </span>
             </div>
           </div>
@@ -84,16 +84,23 @@ export function DashboardCard({ onOpen, onFacilityClick }: Props) {
           <div className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.4px] text-muted-foreground">
             Facilities that need attention
           </div>
-          <ul className="space-y-1.5">
+          <ul className="space-y-1">
             {top3.map((f) => (
               <li key={f.id}>
                 <button
                   type="button"
                   onClick={() => onFacilityClick?.(f.id)}
-                  className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-1 text-left transition-colors hover:bg-surface-sunken"
+                  className="block w-full rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-surface-sunken"
                 >
-                  <span className="truncate text-[12.5px] font-medium">{f.name}</span>
-                  <StatusTag status={f.status} />
+                  <div className="mb-0.5 flex items-center justify-between gap-2">
+                    <span className="truncate text-[12.5px] font-medium">{f.name}</span>
+                    <StatusTag status={f.status} />
+                  </div>
+                  {f.cardInsights[0] && (
+                    <p className="line-clamp-2 text-[11.5px] leading-[1.4] text-muted-foreground">
+                      {f.cardInsights[0]}
+                    </p>
+                  )}
                 </button>
               </li>
             ))}
