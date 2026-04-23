@@ -10,7 +10,7 @@ type Filter = "all" | FacilityStatus;
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "action", label: "Action needed" },
+  { id: "action", label: "Critical" },
   { id: "risk", label: "At risk" },
   { id: "improving", label: "Improving" },
   { id: "target", label: "On target" },
