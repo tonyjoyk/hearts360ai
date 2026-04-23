@@ -89,3 +89,13 @@ npm run sync:hearts360-static-card
 ```
 
 That writes **`../hearts360/overview-ds-card-district-data.generated.html`** (sibling repo). Paste its contents over the **`ds-metrics-wrap` … `ds-fac-list`** section in **`hearts360/index.html`**, or use it as a diff check. Sparklines stay as fixed SVG paths in that fragment (visual design, not tied to numeric series).
+
+## 9. Shareable live URL
+
+**GitHub Actions → GitHub Pages**
+
+1. Repo **Settings → Pages**: set **Source** to **GitHub Actions** (not “Deploy from branch”).
+2. Push to **`main`**; workflow **Deploy to GitHub Pages** (`.github/workflows/deploy-pages.yml`) builds with `VITE_BASE_PATH=/<repo>/` and publishes **`dist`**.
+3. After the first successful run, the site is at **`https://<username>.github.io/<repo>/`** (for this repo: **`https://tonyjoyk.github.io/hearts360ai/`**). Use hash routes, e.g. **`…/hearts360ai/#/embed/summary?embed=1`**.
+
+**Vercel:** Import the repo at [vercel.com](https://vercel.com); production builds set **`VERCEL=1`** so `vite.config.ts` uses **`base: "/"`**. **`vercel.json`** adds SPA rewrites. Example app URL: **`https://<project>.vercel.app`**.
