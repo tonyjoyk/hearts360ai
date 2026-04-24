@@ -7,8 +7,6 @@ interface Props {
   width?: number;
   height?: number;
   className?: string;
-  /** Match HEARTS360 static card: orange-red dot when tone is bad (insights embed only). */
-  insightsOrangeBad?: boolean;
 }
 
 const dotClass: Record<DotTone, string> = {
@@ -17,15 +15,7 @@ const dotClass: Record<DotTone, string> = {
   flat: "fill-muted-foreground/60",
 };
 
-export function Sparkline({
-  current,
-  delta,
-  goodDir,
-  width = 80,
-  height = 22,
-  className = "",
-  insightsOrangeBad = false,
-}: Props) {
+export function Sparkline({ current, delta, goodDir, width = 80, height = 22, className = "" }: Props) {
   const data = generateSeries(current, delta);
   const path = sparkPath(data, width, height);
   const tone = dotTone(delta, goodDir);
@@ -44,16 +34,7 @@ export function Sparkline({
       aria-hidden="true"
     >
       <path d={path} fill="none" stroke="hsl(var(--muted-foreground))" strokeOpacity="0.5" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-      <circle
-        cx={cx}
-        cy={cy}
-        r="2.2"
-        className={
-          insightsOrangeBad && tone === "bad"
-            ? "fill-[#ED6300]"
-            : dotClass[tone]
-        }
-      />
+      <circle cx={cx} cy={cy} r="2.2" className={dotClass[tone]} />
     </svg>
   );
 }

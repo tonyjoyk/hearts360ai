@@ -19,7 +19,7 @@
  *   window.Hearts360Panel.toggle();
  *
  * Optional script attributes:
- *   data-src    Override the iframe URL (default: HashRouter URL next to this script, see defaultSummaryIframeSrc)
+ *   data-src    Override the iframe URL (default: same origin as this script + /embed/summary?embed=1)
  *   data-width  Initial panel width in px (default: 460)
  *   data-auto-open   Set to "true" to open immediately on load
  */
@@ -27,52 +27,13 @@
   if (window.Hearts360Panel) return; // singleton
 
   var script = document.currentScript;
-  if (!script) {
-    var scripts = document.getElementsByTagName("script");
-    for (var i = scripts.length - 1; i >= 0; i--) {
-      var s = scripts[i].src || "";
-      if (s.indexOf("hearts360-embed") !== -1 || s.indexOf("/embed.js") !== -1) {
-        script = scripts[i];
-        break;
-      }
-    }
-  }
   var origin = (function () {
     try { return new URL(script.src).origin; } catch (e) { return ""; }
   })();
 
-  /** Vite base is /tool/ and the app uses HashRouter — path routes like /embed/summary do not exist. */
-  function defaultSummaryIframeSrc() {
-    var fallback = "/tool/index.html#/embed/summary?embed=1";
-    if (!script || !script.src) {
-      try {
-        return (typeof location !== "undefined" && location.origin
-          ? location.origin
-          : "") + fallback;
-      } catch (e2) {
-        return fallback;
-      }
-    }
-    try {
-      var u = new URL(script.src);
-      var path = u.pathname;
-      if (/\/embed\.js$/i.test(path)) {
-        var dir = path.replace(/\/embed\.js$/i, "");
-        if (!dir.endsWith("/")) dir += "/";
-        return u.origin + dir + "index.html#/embed/summary?embed=1";
-      }
-      if (/hearts360-embed\.js$/i.test(path)) {
-        return u.origin + "/tool/index.html#/embed/summary?embed=1";
-      }
-      return u.origin + fallback;
-    } catch (e) {
-      return (origin || "") + fallback;
-    }
-  }
-
   var IFRAME_SRC =
     (script && script.getAttribute("data-src")) ||
-    defaultSummaryIframeSrc();
+    origin + "/embed/summary?embed=1";
 
   var STORAGE_KEY = "hearts360.panelWidth";
   var MIN_WIDTH = 320;
@@ -104,31 +65,7 @@
     );
   }
 
-  function injectGripStyles() {
-    if (document.getElementById("hearts360-panel-grip-styles")) return;
-    var st = document.createElement("style");
-    st.id = "hearts360-panel-grip-styles";
-    st.textContent =
-      "#hearts360-panel-root .hearts360-panel-resize-handle{" +
-      "position:absolute;top:0;left:-5px;width:10px;height:100%;" +
-      "cursor:col-resize;z-index:1;background:transparent;" +
-      "}" +
-      "#hearts360-panel-root .hearts360-panel-resize-grip{" +
-      "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
-      "width:5px;height:34px;border-radius:999px;" +
-      "background:rgba(75,85,99,0.92);opacity:0;pointer-events:none;" +
-      "transition:opacity .15s ease;" +
-      "box-shadow:0 0 0 1px rgba(255,255,255,.35);" +
-      "}" +
-      "#hearts360-panel-root .hearts360-panel-resize-handle:hover .hearts360-panel-resize-grip," +
-      "#hearts360-panel-root .hearts360-panel-resize-handle.hearts360-panel-resize--dragging .hearts360-panel-resize-grip{" +
-      "opacity:1;" +
-      "}";
-    document.head.appendChild(st);
-  }
-
   function build() {
-    injectGripStyles();
     root = document.createElement("aside");
     root.id = "hearts360-panel-root";
     root.setAttribute("aria-label", "District summary");
@@ -139,7 +76,7 @@
       "bottom:0",
       "width:" + width + "px",
       "background:#fff",
-      "border-left:3px solid rgba(0,0,0,0.12)",
+      "border-left:1px solid rgba(0,0,0,0.12)",
       "box-shadow:-4px 0 16px rgba(0,0,0,0.06)",
       "z-index:2147483000",
       "display:none",
@@ -147,15 +84,20 @@
       "font-family:inherit",
     ].join(";");
 
-    // Resize handle (+ centered grip affordance on hover)
+    // Resize handle
     handle = document.createElement("div");
-    handle.className = "hearts360-panel-resize-handle";
     handle.setAttribute("role", "separator");
     handle.setAttribute("aria-label", "Resize panel");
-    var grip = document.createElement("span");
-    grip.className = "hearts360-panel-resize-grip";
-    grip.setAttribute("aria-hidden", "true");
-    handle.appendChild(grip);
+    handle.style.cssText = [
+      "position:absolute",
+      "top:0",
+      "left:-3px",
+      "width:6px",
+      "height:100%",
+      "cursor:col-resize",
+      "z-index:1",
+      "background:transparent",
+    ].join(";");
     handle.addEventListener("mousedown", onDragStart);
     root.appendChild(handle);
 
@@ -176,7 +118,6 @@
 
   function onDragStart(e) {
     e.preventDefault();
-    handle.classList.add("hearts360-panel-resize--dragging");
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
     // Block iframe from swallowing mouse events while dragging
@@ -191,7 +132,6 @@
       if (open) setHostPadding(width);
     }
     function onUp() {
-      handle.classList.remove("hearts360-panel-resize--dragging");
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       iframe.style.pointerEvents = "";
