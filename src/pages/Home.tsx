@@ -37,13 +37,8 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <h1 className="mb-1 text-[18px] font-semibold">Home</h1>
-        <p className="mb-6 text-[12.5px] text-muted-foreground">
-          Quick view of district performance.
-        </p>
-
-        <div className="max-w-[460px]">
+      <div className="mx-auto max-w-6xl px-6 pb-8 pt-10">
+        <div className="max-w-[520px]">
           <DashboardCard
             onOpen={() => setOpen(true)}
             onFacilityClick={handleFacilityClick}

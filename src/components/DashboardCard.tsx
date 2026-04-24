@@ -10,9 +10,9 @@ interface Props {
 }
 
 function formatDelta(delta: number) {
-  if (delta === 0) return "0 pp";
-  const sign = delta > 0 ? "+" : "\u2212";
-  return `${sign}${Math.abs(delta)}\u00a0pp`;
+  if (delta === 0) return "0%";
+  const sign = delta > 0 ? "+" : "-";
+  return `${sign}${Math.abs(delta)}%`;
 }
 
 function deltaTone(delta: number, goodDir: "up" | "down"): "good" | "bad" | "flat" {
@@ -32,6 +32,10 @@ const TONE_CLS: Record<"good" | "bad" | "flat", string> = {
  * panel: ✨-prefixed title, a 3-up KPI tile grid (delta-first, with mini
  * sparklines), the top 3 facilities that need attention with full context
  * blurbs, and a primary "View district report" action.
+ *
+ * Visual emphasis: thin blue accent bar across the top, blue Sparkles, blue
+ * CTA, and a slightly heavier border + shadow so the card reads as the
+ * primary surface on the Home shell without becoming loud.
  */
 export function DashboardCard({ onOpen, onFacilityClick }: Props) {
   const headlineKeys = ["bpControl", "bpUncontrolled", "missed"];
@@ -41,12 +45,15 @@ export function DashboardCard({ onOpen, onFacilityClick }: Props) {
   return (
     <section
       aria-label="District summary"
-      className="overflow-hidden rounded-xl border bg-surface shadow-sm"
+      className="overflow-hidden rounded-xl border-2 border-border bg-surface shadow-md"
     >
+      {/* Blue accent strip — single decorative cue */}
+      <div className="h-[3px] bg-accent-blue" aria-hidden="true" />
+
       <div className="p-5">
         {/* Title */}
         <div className="mb-4 flex items-center gap-2">
-          <Sparkles className="h-[18px] w-[18px] text-primary" aria-hidden="true" />
+          <Sparkles className="h-[18px] w-[18px] text-accent-blue" aria-hidden="true" />
           <h2 className="text-[18px] font-bold leading-none tracking-tight">
             District summary
           </h2>
@@ -112,7 +119,7 @@ export function DashboardCard({ onOpen, onFacilityClick }: Props) {
         <button
           type="button"
           onClick={onOpen}
-          className="flex w-full items-center justify-center rounded-lg bg-foreground px-4 py-3 text-[13.5px] font-semibold text-background transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex w-full items-center justify-center rounded-lg bg-accent-blue px-4 py-3 text-[13.5px] font-semibold text-accent-blue-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           View district report
         </button>
