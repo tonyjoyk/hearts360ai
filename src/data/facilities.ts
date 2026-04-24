@@ -78,19 +78,19 @@ export const DISTRICT = {
   stats: [
     { key: "bpControl", label: "BP control", value: 54, delta: -2, goodDir: "up" as const },
     { key: "bpUncontrolled", label: "BP uncontrolled", value: 17, delta: 1, goodDir: "down" as const },
-    { key: "missed", label: "Missed visit", value: 31, delta: 1, goodDir: "down" as const },
+    { key: "missed", label: "No visit in 3 months", value: 31, delta: 1, goodDir: "down" as const },
     { key: "titration", label: "Titration rate", value: 36, delta: -1, goodDir: "up" as const },
-    { key: "statins", label: "Statin prescription", value: 48, delta: 1, goodDir: "up" as const },
+    { key: "statins", label: "Statins prescribed", value: 48, delta: 1, goodDir: "up" as const },
     { key: "fudging", label: "BP fudging", value: 8, delta: 0, goodDir: "down" as const },
   ],
 };
 
 export const DISTRICT_INSIGHTS: { tone: "bad" | "good"; text: string }[] = [
-  { tone: "bad", text: "BP control has dropped for 3 months in a row. The main reasons look like low titration (36%) and missed visits (31%)." },
-  { tone: "bad", text: "6 facilities need action this month. 2 of them are new problems." },
-  { tone: "bad", text: "Drug stock is low at 3 facilities. Kacuya Bohor has been low for 4 months." },
-  { tone: "good", text: "Overdue patient calls have doubled. About 1,000 patients came back to care last month." },
-  { tone: "good", text: "5 facilities improved by 2 points or more. Gungadiya and Paton gained 6 points each." },
+  { tone: "bad", text: "BP control is dropping for 3 months. Few medicine changes and missed visits are the cause." },
+  { tone: "bad", text: "6 facilities need action. 2 are new this month." },
+  { tone: "bad", text: "3 facilities are low on medicines. Kacuya Bohor has been low for 4 months." },
+  { tone: "good", text: "Calls to overdue patients doubled. About 1,000 patients came back." },
+  { tone: "good", text: "5 facilities improved by 2% or more. Gungadiya and Paton gained 6%." },
 ];
 
 // Drug-stock days lookup matching the HTML's pool logic
