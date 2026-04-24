@@ -12,9 +12,9 @@ interface Props {
 }
 
 function formatDelta(delta: number) {
-  if (delta === 0) return "0 pp";
-  const sign = delta > 0 ? "+" : "\u2212";
-  return `${sign}${Math.abs(delta)} pp`;
+  if (delta === 0) return "0%";
+  const sign = delta > 0 ? "+" : "-";
+  return `${sign}${Math.abs(delta)}%`;
 }
 
 function deltaTone(delta: number, goodDir: "up" | "down"): "good" | "bad" | "flat" {

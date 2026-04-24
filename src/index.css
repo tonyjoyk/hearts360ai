@@ -51,6 +51,10 @@
     --amber-border: 53 97% 87%;        /* #FEFCBF */
     --amber-text: 32 73% 34%;          /* #975A16 */
 
+    /* Accent blue — used for the Dashboard card CTA + accent bar */
+    --accent-blue: 217 91% 50%;
+    --accent-blue-foreground: 0 0% 100%;
+
     /* Insight category palette (bg + text pairs) */
     --cat-op-bg: 213 60% 95%;          /* #EBF2FA */
     --cat-op-text: 224 71% 40%;        /* #1E40AF */
@@ -168,6 +172,11 @@
   .bg-amber-bg { background-color: hsl(var(--amber-bg)); }
   .border-amber-border { border-color: hsl(var(--amber-border)); }
   .text-amber-text { color: hsl(var(--amber-text)); }
+
+  /* Accent blue */
+  .bg-accent-blue { background-color: hsl(var(--accent-blue)); }
+  .text-accent-blue { color: hsl(var(--accent-blue)); }
+  .text-accent-blue-foreground { color: hsl(var(--accent-blue-foreground)); }
 
   /* Category tags */
   .cat-op { background-color: hsl(var(--cat-op-bg)); color: hsl(var(--cat-op-text)); }
