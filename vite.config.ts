@@ -31,7 +31,9 @@ const baseUrl = resolveBaseUrl();
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`,
+  // In dev, always serve from "/" so the Lovable preview (and plain `vite`) works.
+  // The "/tool/" base only applies to production builds for the hearts360 copy.
+  base: mode === "development" ? "/" : (baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`),
   server: {
     host: "::",
     port: 8080,
